@@ -2,9 +2,12 @@
      style="width: 18rem;">
     <div class="card-body">
         <h5 class="card-title">${title}</h5>
-        <small class="card-subtitle">${id}</small>
+        <small class="card-subtitle">${ident}</small>
         <p class="card-text">${body}</p>
-        <a href="#"
-           class="btn btn-primary">Go somewhere</a>
+        <form action="/api/messages/${ident}?_method=DELETE"
+              method="POST">
+            <button class="btn btn-danger"
+                    type="submit">Delete</button>
+        </form>
     </div>
 </div>

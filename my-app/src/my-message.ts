@@ -1,7 +1,7 @@
 import { bindable } from "aurelia";
 
 export class MyMessage {
-    @bindable() id;
+    @bindable() ident;
     @bindable() title;
     @bindable() body;
 }
