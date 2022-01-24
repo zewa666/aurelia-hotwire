@@ -1,0 +1,7 @@
+<turbo-frame id="new_message_<%- field %>_frame">
+  <% if(error != false) { %>
+  <div class="alert alert-danger" role="alert">
+    The field <%- field %> is required.
+  </div>
+  <% } %>
+</turbo-frame>

@@ -1,17 +1,34 @@
-import { convertToRenderLocation, CustomElement, ICustomElementController, CustomElementDefinition, ViewFactory } from "@aurelia/runtime-html";
+import { convertToRenderLocation, CustomElement, ICustomElementController, CustomElementDefinition, ViewFactory, ISyntheticView } from "@aurelia/runtime-html";
 import { Scope } from '@aurelia/runtime';
 import { LifecycleFlags } from "aurelia";
 
 export class MyApp {
   public messages: HTMLDivElement;
-
-  private observer: MutationObserver;
   public readonly $controller!: ICustomElementController<this>;
+  
+  private enhancedElements: Map<Node, ISyntheticView> = new Map();
+  private observer: MutationObserver;
 
   attached() {
     const config = { attributes: true, childList: true, characterData: true };  
     this.observer = new MutationObserver((muts) => {
       muts.forEach(mut => {
+        mut.removedNodes.forEach(async (node) => {
+          this.observer.disconnect();
+          if (mut.previousSibling?.nodeType === Node.COMMENT_NODE &&
+            mut.nextSibling?.nodeType === Node.COMMENT_NODE) {
+              (mut.previousSibling as CharacterData).remove();
+              (mut.nextSibling as CharacterData).remove();
+          }
+
+          if (this.enhancedElements.has(node)) {
+            const view = this.enhancedElements.get(node);
+            await view.deactivate(view, this.$controller, LifecycleFlags.none)
+            this.enhancedElements.delete(node);
+          }
+
+          this.observer.observe(this.messages, config);
+        });
         mut.addedNodes.forEach(async (node) => {
           this.observer.disconnect();
 
@@ -32,6 +49,7 @@ export class MyApp {
               Scope.create({})
             );
 
+            this.enhancedElements.set(node, view);
             this.observer.observe(this.messages, config);
           }
         })
